@@ -1,8 +1,9 @@
 import subprocess
 
 def scanner(target):
-    network_hosts = f"sudo nmap -T4 -sn -PS22,80,443,3389 -PA80 -PU53 -PP {target} -oG - | awk '/Up$/{{print $2}}' > hosts_active.txt"
-    result = subprocess.run(network_hosts, shell=True, capture_output=False, text=True)
+    network_hosts = f"sudo nmap -T4 -sn -PS22,80,443,3389 -PA80 -PU53 -PP -oX - {target}"
+    result = subprocess.run(network_hosts, shell=True, capture_output=True, text=True)
+    print(result.stdout)
     print("---Done looking for hosts---\n")
     print("---Looking for hosts with open ports---\n")
     open_ports = "nmap -T4 --open -iL hosts_active.txt"
@@ -17,6 +18,7 @@ def scanner(target):
     
 
 def main():
-    scanner("ip target")
+    target_cidr = input("Please enter the target CIDR:")
+    scanner(target_cidr)
 
 main()
