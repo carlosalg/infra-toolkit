@@ -108,7 +108,7 @@ def scanner(target):
         if ip in scan_report:
             for port in host.findall('.//port'):
                 scan_report[ip]["ports"].append({
-                    "port": port.get('portid'),
+                    "port": int(port.get('portid')),
                     "state": port.find('state').get('state')
                 })
     logger.info("Port scan completed successfully")
@@ -122,11 +122,15 @@ def scanner(target):
     for host in data_results3.findall('.//host'):
         ip = host.find('address').get('addr')
         if ip in scan_report:
-            for service in host.findall('.//service'):
-                scan_report[ip]["services"].append({
-                    "name": service.get('name'),
-                    "product": service.get('product')                                       
-                })
+            for port in host.findall('.//port'):
+                service = port.find('service')
+                if service is not None:
+                    scan_report[ip]["services"].append({
+                        "port": int(port.get('portid')),
+                        "protocol": port.get('protocol'),
+                        "name": service.get('name'),
+                        "product": service.get('product')                                       
+                    })
 
     logger.info("Active servces scan completed")
 
