@@ -4,7 +4,8 @@ import logging
 from datetime import datetime
 import json
 import sys
-
+from utils.timing import ScanTimer
+from utils.id_gen import generate_id
 #Logger config
 logging.basicConfig(
     level = logging.INFO,
@@ -16,7 +17,7 @@ logging.basicConfig(
 )
 
 logger = logging.getLogger(__name__)
-
+timer = ScanTimer()
 
 def nmap_runner(cmd: List[str]) -> Optional[str]:
     logger.info(f"Starting nmap with command: {' '.join(cmd)}")
@@ -64,7 +65,7 @@ def nmap_runner(cmd: List[str]) -> Optional[str]:
 def scanner(target):
 
     scan_report = {}
-
+    timer.start_phase("host_discovery")
     logger.info(f"=== Starting host discovery on {target} ===")
     
     network_hosts = ['sudo','nmap', '-T4', '-sn', '-PS22,80,443,3389', '-PA80', '-PU53', '-PP', '-oX', '-', target]
@@ -96,7 +97,8 @@ def scanner(target):
     else:
         logger.debug(f"Hosts founded: {', '.join(active_hosts[:10])}...")
 
-
+    # Active host port scanning
+    timer.start_phase("port_scaning")
     logger.info(f"=== Starting port scan on {len(active_hosts)} hosts ===")
     
     open_ports = ['nmap', '--open'] + active_hosts + ['-oX','-']
@@ -112,7 +114,9 @@ def scanner(target):
                     "state": port.find('state').get('state')
                 })
     logger.info("Port scan completed successfully")
-
+    
+    # Looking for active services on open ports
+    timer.start_phase("service_scanning")
     logger.info("=== Searching for active services ===")
     
     active_services = ['nmap','-sV', '-oX','-']+active_hosts
@@ -132,11 +136,11 @@ def scanner(target):
                         "product": service.get('product')                                       
                     })
 
-    logger.info("Active servces scan completed")
-
+    logger.info("Active services scan completed")
     final_data = {
         "metadata":{
             "report_generated": datetime.now().isoformat(),
+            "scan_id":generate_id(),
             "scanner": "nmap",
             "version": data_results1.get('version'),
             "target_network": target,
@@ -147,7 +151,21 @@ def scanner(target):
             ],
             "total_hosts_scanned": len(scan_report)
         },
-        "hosts": list(scan_report.values())
+        "hosts": list(scan_report.values()),
+        "summary":{
+            "hosts_up": len(active_hosts),
+            "hosts_with_open_ports": sum(
+                1 for host_data in scan_report.values()
+                if len(host_data.get("services", [])) > 0
+            ),
+            "total_open_ports": sum(
+                len(open_ports["services"])
+                for open_ports in scan_report.values()
+            ),
+            "timing": timer.get_summary()
+            
+        }
+
     }
 
     with open('./network_scan_report.json', 'w') as f:
