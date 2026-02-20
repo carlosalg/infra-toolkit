@@ -1,0 +1,3 @@
+# Ingnore Logs and json files
+*.log
+*.json
