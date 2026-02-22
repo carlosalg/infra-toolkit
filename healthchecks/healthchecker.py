@@ -13,8 +13,8 @@ def main():
     running_services = [
         {
             "ip": host["ip"],
-            "puerto": service["port"],
-            "servicio": service["name"]
+            "port": service["port"],
+            "service": service["name"]
         }
         for host in data["hosts"]
         for service in host["services"]
