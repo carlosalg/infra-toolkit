@@ -1,9 +1,18 @@
 import json
+from .checks.tcp_check import tcp_check 
 
+
+HEALTH_CHECKS = {
+    "tcp" : tcp_check,
+}
 
 def healthcheker(data):
-
-    print(data)
+    accion = "tcp"
+    for entry in data:
+        ip = entry["ip"]
+        port = entry["port"]
+        result = HEALTH_CHECKS[accion](ip,port)
+        print(result)
 
 
 def main():
