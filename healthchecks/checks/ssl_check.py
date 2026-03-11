@@ -6,8 +6,10 @@ from datetime import datetime
 def ssl_ccheck(host,port=443,timeout=5):
     try:
         context = ssl.create_default_context()
+        context.check_hostname = False
+        context.verify_mode = ssl.CERT_NONE
         with socket.create_connection((host, port), timeout=timeout) as sock:
-            with context.wrap_socket(sock,server_hostname=host) as ssock:
+            with context.wrap_socket(sock) as ssock:
                 cert = ssock.getpeercert()
                 return {
                     "subject": dict(x[0] for x in cert["subject"]),
@@ -23,8 +25,10 @@ def ssl_ccheck(host,port=443,timeout=5):
 def ssl_echeck(host, port=443, timeout=5):
     try:
         context = ssl.create_default_context()
+        context.check_hostname = False
+        context.verify_mode = ssl.CERT_NONE
         with socket.create_connection((host, port), timeout=timeout) as sock:
-            with context.wrap_socket(sock, server_hostname=host) as ssock:
+            with context.wrap_socket(sock) as ssock:
                 cert = ssock.getpeercert()
                 expiry_str = cert["notAfter"]
                 expiry_date = datetime.strptime(expiry_str, "%b %d %H:%M:%S %Y %Z")
@@ -38,20 +42,8 @@ def ssl_echeck(host, port=443, timeout=5):
     except Exception as e:
         return {"error": str(e)}
 
-def ssl_hvalid(host, port=443, timeout=5):
-    try:
-        context = ssl.create_default_context()
-        with socket.create_connection((host,port), timeout=timeout) as sock:
-            with context.wrap_socket(sock, server_hostname=host) as ssock:
-                return {"valid": True}
-    except ssl.CertificateError as e:
-        return {"valid": False,"reason": str(e)}
-    except Exception as e:
-        return {"error": str(e)}
-
 def run_ssl_checks(host,port=443):
     return {
         "ssl_cert": ssl_cert_check(hostname, port),
         "ssl_expiry": ssl_expiry_check(hostname, port),
-        "ssl_hostname_valid": ssl_hostname_valid(hostname, port)
     }

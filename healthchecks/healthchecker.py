@@ -1,31 +1,26 @@
 import json
-from .checks import tcp_check as checks
+from .checks.tcp_check import run_tcp_checks as tcp
 from .checks import https_rcheck as httpsrc
-from .checks import dns_check as dnsChecks
+from .checks.dns_check import run_dns_check as dns
+from .checks.ssl_check import run_ssl_checks as ssl 
 
 HEALTH_CHECKS = {
-    "tcp" : checks.tcp_check,
-    "banner" : checks.banner_grabbing,
-    "latency": checks.latency_check,
+    "tcp" : tcp,
     "http_s": httpsrc.http_check,
-    "dns": dnsChecks.dns_checker,
+    "dns": dns,
+    "ssl": ssl
 }
 
-def healthcheker(data):
-    action = "tcp"
-    action2 = "banner"
+def healthcheker(data, dns_test_hostname="google.com"):
     for entry in data:
         ip = entry["ip"]
         port = entry["port"]
-        result =    HEALTH_CHECKS[action](ip,port)
-        banner =    HEALTH_CHECKS[action2](ip,port)
-        latency =   HEALTH_CHECKS["latency"](ip,port)
+        tcp_results= HEALTH_CHECKS["tcp"](ip,port)
         https =     HEALTH_CHECKS["http_s"](ip,port)
-        dns =       HEALTH_CHECKS["dns"]("google.com",ip)
-        print(result,banner,latency)
-        print(https)
-        print(dns)
-
+        if port == 53:
+            dns_results = HEALTH_CHECKS["dns"](dns_test_hostname,ip)
+        if port ==  443:
+            ssl_results = HEALTH_CHECKS["ssl"](ip, port)
 
 def main():
     with open("network_scan_report.json", "r") as f:
