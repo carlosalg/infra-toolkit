@@ -1,7 +1,7 @@
 import socket
 import time
 
-def tcp_check(host, port, timeout=3):
+def tcp_check(host, port, timeout=5):
     try:
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.settimeout(timeout)
@@ -11,7 +11,7 @@ def tcp_check(host, port, timeout=3):
     except socket.error as e:
         return false
 
-def banner_grabbing(host,port, timeout=3):
+def banner_grabbing(host,port, timeout=5):
     try:
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.settimeout(timeout)
@@ -22,7 +22,7 @@ def banner_grabbing(host,port, timeout=3):
     except Exception:
         return None
 
-def latency_check(host, port, timeout=3):
+def latency_check(host, port, timeout=5):
     try:
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.settimeout(timeout)
@@ -33,3 +33,10 @@ def latency_check(host, port, timeout=3):
         return round(latency,2)
     except Exception:
         return None
+
+def run_tcp_checks(host,port):
+    return {
+        "tcp_open": tcp_check(host,port),
+        "banner": banner_grabbing(host,port),
+        "latency_ms": latency_check(host,port)
+    }

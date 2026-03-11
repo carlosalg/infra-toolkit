@@ -23,3 +23,9 @@ def dns_latency_check(host):
         return round((time.perf_counter() - start) * 1000, 2)
     except dns.exception.DNSException:
         return None
+
+def run_dns_check(hostname, dns_server):
+    return {
+        "dns": dns_checkerU(hostname, dns_server),
+        "dns_latency_ms": dns_latency_check(hostname)
+    }

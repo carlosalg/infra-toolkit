@@ -1,6 +1,6 @@
 import requests
 
-def http_check(host, port, timeout=3):
+def http_check(host, port, timeout=5):
     for scheme in ("https", "http"):
         try:
             url = f"{scheme}://{host}:{port}"
