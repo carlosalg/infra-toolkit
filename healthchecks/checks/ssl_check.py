@@ -44,6 +44,6 @@ def ssl_echeck(host, port=443, timeout=5):
 
 def run_ssl_checks(host,port=443):
     return {
-        "ssl_cert": ssl_cert_check(hostname, port),
-        "ssl_expiry": ssl_expiry_check(hostname, port),
+        "ssl_cert": ssl_ccheck(host, port),
+        "ssl_expiry": ssl_echeck(host, port),
     }
