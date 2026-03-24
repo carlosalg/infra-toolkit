@@ -1,10 +1,25 @@
 import json
+import logging
+import sys
 from datetime import datetime
 from .checks.tcp_check import run_tcp_checks as tcp
 from .checks import https_rcheck as httpsrc
 from .checks.dns_check import run_dns_check as dns
 from .checks.ssl_check import run_ssl_checks as ssl 
 
+
+#Logger config
+
+logging.basicConfig(
+    level = logging.INFO,
+    format = '%(asctime)s - %(levelname)s - %(message)s',
+    handlers = [
+        logging.FileHandler('healthcheck_scanner.log'),
+        logging.StreamHandler(sys.stdout)
+    ]
+)
+
+logger = logging.getLogger("healtcheck")
 
 HEALTH_CHECKS = {
     "tcp" : tcp,
@@ -18,7 +33,7 @@ def healthcheker(data, dns_test_hostname="google.com"):
     for entry in data:
         ip = entry["ip"]
         port = entry["port"]
-
+        logger.info(f"Checking {ip}:{port} ({entry['service']})")
         result = {
         "ip": ip,
         "port": port,
@@ -28,6 +43,7 @@ def healthcheker(data, dns_test_hostname="google.com"):
         "dns": HEALTH_CHECKS["dns"](dns_test_hostname,ip) if port == 53 else None,
         "ssl": HEALTH_CHECKS["ssl"](ip, port) if port == 443 else None,
         }
+        logger.debug(f"Result for {ip}:{port} - {result}")
         results.append(result)
 
     report_data = {
@@ -53,6 +69,8 @@ def healthcheker(data, dns_test_hostname="google.com"):
     with open('./network_healthcheck_report.json', 'w') as f:
         json.dump(report_data, f, indent=2)
 
+    logger.info("Finished Network Health Checks")
+
 def main():
     with open("network_scan_report.json", "r") as f:
         data = json.load(f)
@@ -70,4 +88,13 @@ def main():
     healthcheker(running_services)
 
 
-main()
+if __name__ == "__main__":
+    try:
+        main()
+    except KeyboardInterrupt:
+        logger.warning("\n HealthChecks interrupted by user (Ctrl+C)")
+        sys.exit(130)
+    except Exception as e:
+        logger.critical(f"Unhandled fatal error: {e}")
+        logger.exception("Stacktrace complete:")
+        sys.exit(1)

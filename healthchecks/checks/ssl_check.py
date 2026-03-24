@@ -1,9 +1,11 @@
 import ssl
 import socket
+import logging
 from datetime import datetime
 
-
+logger = logging.getLogger("healthcheck.ssl_check")
 def ssl_ccheck(host,port=443,timeout=5):
+    logger.info(f"Starting SSL certification check on {host}:{port}")
     try:
         context = ssl.create_default_context()
         context.check_hostname = False
@@ -20,9 +22,11 @@ def ssl_ccheck(host,port=443,timeout=5):
                     "san": cert.get("subjectAltName", [])
                 }
     except Exception as e:
+        logger.error(f"Error on {host}:{port} - {e}")
         return {"error": str(e)}
 
 def ssl_echeck(host, port=443, timeout=5):
+    logger.info(f"Starting SSL expiry check on {host}:{port}")
     try:
         context = ssl.create_default_context()
         context.check_hostname = False
@@ -40,6 +44,7 @@ def ssl_echeck(host, port=443, timeout=5):
                     "expiring_soon": 0 <= days_remaining <= 30
                 }
     except Exception as e:
+        logger.error(f"Error on {host}:{port} - {e}")
         return {"error": str(e)}
 
 def run_ssl_checks(host,port=443):

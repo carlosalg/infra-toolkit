@@ -1,7 +1,10 @@
 import socket
 import time
+import logging
 
+logger = logging.getLogger("healthcheck.tcp_check")
 def tcp_check(host, port, timeout=5):
+    logger.info(f"Starting tcp check on {host}:{port}")
     try:
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.settimeout(timeout)
@@ -9,20 +12,24 @@ def tcp_check(host, port, timeout=5):
         sock.close()
         return result == 0
     except socket.error as e:
+        logger.error(f"TCP check failed: {e}")
         return false
 
 def banner_grabbing(host,port, timeout=5):
+    logger.info(f"Starting banner grabbing check on {host}:{port}")
     try:
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.settimeout(timeout)
         sock.connect((host, port))
-        banner = rock.recv(1024).decode('utf-8',errors= 'ignore').strip()
+        banner = sock.recv(1024).decode('utf-8',errors= 'ignore').strip()
         sock.close()
         return banner
     except Exception:
+        logger.warning("Banner not found")
         return None
 
 def latency_check(host, port, timeout=5):
+    logger.info(f"Starting TCP latency check on {host}:{port}")
     try:
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.settimeout(timeout)
@@ -32,6 +39,7 @@ def latency_check(host, port, timeout=5):
         sock.close()
         return round(latency,2)
     except Exception:
+        logger.warning("Latency check time out")
         return None
 
 def run_tcp_checks(host,port):
