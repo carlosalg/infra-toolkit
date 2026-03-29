@@ -174,17 +174,6 @@ def scanner(target):
     logger.info("Network Scan Completed")
     
 
-def main():
-    target_cidr = input("Please enter the target CIDR:")
-    scanner(target_cidr)
+def scan_runner(cidr):
+    scanner(cidr)
 
-if __name__ == "__main__":
-    try:
-        main()
-    except KeyboardInterrupt:
-        logger.warning("\nScan interrupted by user (Ctrl+C)")
-        sys.exit(130)
-    except Exception as e:
-        logger.critical(f"Unhandled fatal error: {e}")
-        logger.exception("Stacktrace complete:")
-        sys.exit(1)

@@ -71,7 +71,7 @@ def healthcheker(data, dns_test_hostname="google.com"):
 
     logger.info("Finished Network Health Checks")
 
-def main():
+def healthcheck_runner():
     with open("network_scan_report.json", "r") as f:
         data = json.load(f)
 
@@ -86,15 +86,3 @@ def main():
     ]
 
     healthcheker(running_services)
-
-
-if __name__ == "__main__":
-    try:
-        main()
-    except KeyboardInterrupt:
-        logger.warning("\n HealthChecks interrupted by user (Ctrl+C)")
-        sys.exit(130)
-    except Exception as e:
-        logger.critical(f"Unhandled fatal error: {e}")
-        logger.exception("Stacktrace complete:")
-        sys.exit(1)
