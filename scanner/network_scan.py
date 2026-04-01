@@ -68,7 +68,7 @@ def scanner(target):
     timer.start_phase("host_discovery")
     logger.info(f"=== Starting host discovery on {target} ===")
     
-    network_hosts = ['sudo','nmap', '-T4', '-sn', '-PS22,80,443,3389', '-PA80', '-PU53', '-PP', '-oX', '-', target]
+    network_hosts = ['nmap', '-T4', '-sn', '-PS22,80,443,3389', '-PA80', '-PU53', '-PP', '-oX', '-', target]
     hosts_result = nmap_runner(network_hosts)
     data_results1 = et.fromstring(hosts_result)
 
