@@ -66,7 +66,7 @@ def healthcheker(data, dns_test_hostname="google.com"):
 
     }
 
-    with open('./network_healthcheck_report.json', 'w') as f:
+    with open('./reports/network_healthcheck_report.json', 'w') as f:
         json.dump(report_data, f, indent=2)
 
     logger.info("Finished Network Health Checks")

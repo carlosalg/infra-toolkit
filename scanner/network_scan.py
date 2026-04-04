@@ -4,6 +4,7 @@ import logging
 from datetime import datetime
 import json
 import sys
+import os 
 from utils.timing import ScanTimer
 from utils.id_gen import generate_id
 #Logger config
@@ -67,8 +68,12 @@ def scanner(target):
     scan_report = {}
     timer.start_phase("host_discovery")
     logger.info(f"=== Starting host discovery on {target} ===")
-    
-    network_hosts = ['nmap', '-T4', '-sn', '-PS22,80,443,3389', '-PA80', '-PU53', '-PP', '-oX', '-', target]
+
+    if os.geteuid() != 0:
+        network_hosts = ['sudo','nmap', '-T4', '-sn', '-PS22,80,443,3389', '-PA80', '-PU53', '-PP', '-oX', '-', target]
+    else:
+        network_hosts = ['nmap', '-T4', '-sn', '-PS22,80,443,3389', '-PA80', '-PU53', '-PP', '-oX', '-', target]
+
     hosts_result = nmap_runner(network_hosts)
     data_results1 = et.fromstring(hosts_result)
 
@@ -168,7 +173,7 @@ def scanner(target):
 
     }
 
-    with open('./network_scan_report.json', 'w') as f:
+    with open('./reports/network_scan_report.json', 'w') as f:
         json.dump(final_data, f, indent=2)
 
     logger.info("Network Scan Completed")
