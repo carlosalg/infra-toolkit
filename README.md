@@ -32,3 +32,10 @@ if you find any problems with the tool no accesing the network, use:
 docker run --rm -it --network host infra-toolkit
 ```
 In the docker method, for the container to generate the reports files, you need to run the container like this:
+```bash
+docker run --rm -it --network host -v $(pwd)/reports:/app/reports infra-toolkit
+```
+what this does is mount a local volume inside the working folder, in where it will be saved the generated files inside the container.
+
+## Usage
+When using the toolkit, you will be asked for an CIDR in this format `192.168.1.0/24`, if you are running the toolkit via python, it will also ask for root/sudo password.

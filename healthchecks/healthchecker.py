@@ -72,7 +72,7 @@ def healthcheker(data, dns_test_hostname="google.com"):
     logger.info("Finished Network Health Checks")
 
 def healthcheck_runner():
-    with open("network_scan_report.json", "r") as f:
+    with open("./reports/network_scan_report.json", "r") as f:
         data = json.load(f)
 
     running_services = [
